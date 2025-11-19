@@ -1,96 +1,32 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  admin
-  manager
-  accountant
-  user
-  auditor
-}
-
-enum UserStatus {
-  active
-  inactive
-}
-
-enum ExpenseStatus {
-  approved
-  pending
-  rejected
-  draft
-}
-
-enum AuditAction {
-  create
-  update
-  delete
-  login
-  logout
-  generate_report
-  approve_report
-}
-
-enum AuditTargetType {
-  user
-  expense
-  report
-  system
-  optimisation
-}
-
-model Sede {
-  id   String @id @default(cuid())
-  name String @unique
-}
-
-model Department {
-  id   String @id @default(cuid())
-  name String
-  sede String
-}
-
-model Category {
-  id   String @id @default(cuid())
-  name String
+generator client {
+  provider = "prisma-client-js"
 }
 
 model User {
-  id         String      @id @default(cuid())
-  name       String
-  email      String      @unique
-  password   String?
-  role       UserRole
-  department String
-  sede       String
-  status     UserStatus
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  role      String    @default("user")
+  expenses  Expense[]
 }
 
 model Expense {
-  id          String       @id @default(cuid())
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
   description String
   amount      Float
-  status      ExpenseStatus
-  date        DateTime
   category    String
-  department  String
-  sede        String
-  user        String
-  receiptUrl  String?
-}
-
-model AuditLog {
-  id         String         @id @default(cuid())
-  user       String
-  action     AuditAction
-  targetType AuditTargetType
-  targetId   String
-  timestamp  DateTime      @default(now())
-  details    String
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  status      String   @default("pending")
 }
